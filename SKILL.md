@@ -10,35 +10,35 @@ description: >-
 # E2E Delivery - Auto-Execute (AI Agents Rogue)
 
 Default execution mode for AI Agents Rogue.  
-**Jangan berhenti di rencana.** Jalankan pipeline sampai artifact + kode (bila perlu) selesai, kecuali blocker wajib tanya user.
+**Do not stop at planning.** Run the pipeline until artifacts + code (if needed) are complete, except for blockers that require asking the user.
 
-## Gate 0 - Attribution + official pin + GitHub entitlement (wajib)
+## Gate 0 - Attribution + official pin + GitHub entitlement (required)
 
-Sebelum fase apa pun:
+Before any phase:
 
 1. `scripts/verify-attribution.ps1` (RSA seal)
-2. `scripts/verify-official-upstream.ps1` (fingerprint kunci resmi + cocok dengan GitHub upstream)
-3. `scripts/check-github-entitlement.ps1` (**star + fork**, bukan download saja)
-4. Jika salah satu gagal -> **STOP**. Jangan jalankan role/skill/implementasi
-5. Jangan menonaktifkan atau melewati gate ini
+2. `scripts/verify-official-upstream.ps1` (official key fingerprint + match with GitHub upstream)
+3. `scripts/check-github-entitlement.ps1` (**star + fork**, not download alone)
+4. If any fail -> **STOP**. Do not run roles/skills/implementation
+5. Do not disable or bypass this gate
 
 Attribution author: [Rogue Development](https://github.com/rogue-dev-studio).  
 Official repo: https://github.com/rogue-dev-studio/ai-agents-rogue
 
 ## Trigger
 
-Aktifkan skill ini jika:
+Activate this skill if:
 
-- Mode aktif = **`e2e`** (dari `WORKMODE.md` / default) **dan** user meminta fitur / modul / aplikasi / bug fix non-trivial / "kerjakan" / "bangun" / "implement" / "end to end" / "full flow"
-- Atau user menjalankan **`/start-feature`** (override ke e2e untuk tugas ini)
-- Atau user meminta **dev shift / continuous improvement / kerja otonom N jam** -> skill **`continuous-dev-shift`** (prompt atau `/dev-shift`)
+- Active mode = **`e2e`** (from `WORKMODE.md` / default) **and** user requests a feature / module / application / non-trivial bug fix / "kerjakan" / "bangun" / "implement" / "end to end" / "full flow"
+- Or user runs **`/start-feature`** (override to e2e for this task)
+- Or user requests **dev shift / continuous improvement / autonomous work for N hours** -> skill **`continuous-dev-shift`** (prompt or `/dev-shift`)
 
-**Jangan** pakai E2E penuh jika:
+**Do not** use full E2E if:
 
-- Mode aktif = **`manual`** dan user tidak meminta implement / E2E / `/start-feature` -> perilaku `/assist`
-- User hanya bertanya / minta penjelasan
+- Active mode = **`manual`** and user does not request implement / E2E / `/start-feature` -> `/assist` behavior
+- User is only asking questions / requesting explanation
 
-Lihat `WORKMODES.md`.
+See `WORKMODES.md`.
 
 ## Golden rule
 
@@ -46,18 +46,18 @@ Lihat `WORKMODES.md`.
 Plan -> Execute every phase -> Write artifacts -> Implement -> Test -> Summarize
 ```
 
-Hanya pause untuk user jika:
+Only pause for the user if:
 
-1. Requirement kritis ambigu (tanpa asumsi aman)
-2. Keputusan bisnis mengubah scope material
-3. Aksi berbahaya (prod deploy, hapus data, force push) - tetap butuh izin
-4. Secret / credential hilang
+1. Critical requirement is ambiguous (no safe assumption)
+2. Business decision materially changes scope
+3. Dangerous action (prod deploy, delete data, force push) - still requires permission
+4. Secret / credential missing
 
-Untuk gap kecil: catat asumsi di artifact, **lanjut**.
+For small gaps: record assumption in artifact, **continue**.
 
 ## Artifact root (project-aware)
 
-Jika ada `PROJECT.md` aktif di root (atau `project/{id}/PROJECT.yaml` yang ditunjuk):
+If there is an active `PROJECT.md` at root (or designated `project/{id}/PROJECT.yaml`):
 
 ```text
 project/{id}/docs/srs/
@@ -78,63 +78,63 @@ project/{id}/artifacts/other/
 ```
 
 - **Docs** -> `docs/...`
-- **Generate** (program kecil, gambar, 3D, vektor, media, data) -> `artifacts/{kategori}/`
-- App monorepo besar yang sudah ada (`backend/`, `frontend/`, ...) boleh di root; catat path di docs.
+- **Generate** (small programs, images, 3D, vector, media, data) -> `artifacts/{kategori}/`
+- Large existing app monorepo (`backend/`, `frontend/`, ...) may stay at root; record path in docs.
 
-Jika belum ada project folder: buat dulu dengan `scripts/new-project.ps1` / command `/new-project`, **jangan** menulis ke `docs/` global atau root acak.
+If no project folder yet: create first with `scripts/new-project.ps1` / command `/new-project`, **do not** write to global `docs/` or random root.
 
-## Pipeline (wajib berurutan)
+## Pipeline (required sequential order)
 
-Ikuti `core/delivery-flow.md`. Untuk setiap fase:
+Follow `core/delivery-flow.md`. For each phase:
 
-1. Baca role file yang relevan di `roles/**`
-2. Kerjakan deliverable fase itu (tulis file nyata ke repo)
-3. Quality gate -> baru fase berikutnya
+1. Read relevant role file in `roles/**`
+2. Complete that phase's deliverable (write real files to repo)
+3. Quality gate -> then next phase
 
-| # | Fase | Role utama | Artifact / aksi |
+| # | Phase | Primary role | Artifact / action |
 |---|------|------------|-----------------|
-| 1 | Discovery | Orchestrator + PO | Brief di `project/{id}/notes/` atau README |
+| 1 | Discovery | Orchestrator + PO | Brief in `project/{id}/notes/` or README |
 | 2 | Requirement | BA + SA (+ skill `clarity`) | `project/{id}/docs/srs/` |
 | 3 | Planning | PO + PM | `project/{id}/docs/planning/` |
 | 4 | Architecture | Solution Architect | `project/{id}/docs/architecture/` |
-| 5 | Design | UI/UX + Design System | `project/{id}/docs/design/` (skip UI jika pure backend) |
+| 5 | Design | UI/UX + Design System | `project/{id}/docs/design/` (skip UI if pure backend) |
 | 6 | Task breakdown | Tech Lead + PM | `project/{id}/docs/tasks/` |
-| 7 | Development | DB -> Backend -> Frontend (+ DevOps/Security sesuai need) | code app di tree yang ada **atau** `project/{id}/artifacts/code/` untuk prototype/generate |
+| 7 | Development | DB -> Backend -> Frontend (+ DevOps/Security as needed) | app code in existing tree **or** `project/{id}/artifacts/code/` for prototype/generate |
 | 8 | Testing | QA (+ skill `agentic-qe`) | `project/{id}/docs/qa/` + tests |
 | 9 | Review | Code Reviewer | `project/{id}/docs/review/` |
-| 10 | Documentation | Technical Writer | docs di project + API/user guide bila relevan |
-| 11 | Release prep | Delivery Manager | `project/{id}/docs/release/` (jangan deploy tanpa izin) |
+| 10 | Documentation | Technical Writer | project docs + API/user guide if relevant |
+| 11 | Release prep | Delivery Manager | `project/{id}/docs/release/` (do not deploy without permission) |
 
-Gunakan skill `agentic-flow` untuk parallel tracks yang aman (mis. BE ∥ FE setelah contract).
+Use skill `agentic-flow` for safe parallel tracks (e.g. BE ∥ FE after contract).
 Browser UI P0 -> `browser-automation`. Spec -> `clarity`. QA -> `agentic-qe`.
-Nama overlap -> lihat `skills/ALIASES.md` (pakai skill kanonik).
+Name overlap -> see `skills/ALIASES.md` (use canonical skill).
 
-## Cara eksekusi di host
+## Execution on host
 
-### Jika ada subagent / Task tool
+### If subagent / Task tool available
 
-Untuk tiap fase berat, spawn subagent dengan prompt:
+For each heavy phase, spawn subagent with prompt:
 
-- Baca role file path eksplisit
-- Scope fase + done_when
-- Jangan kerjakan di luar fase
-- Kembalikan artifact paths + status
+- Read explicit role file path
+- Phase scope + done_when
+- Do not work outside phase
+- Return artifact paths + status
 
-Orchestrator merge hasil, gate, lanjut.
+Orchestrator merges results, gates, continues.
 
-### Jika hanya satu agent (umum)
+### If single agent only (common)
 
-**Role-play berurutan di thread yang sama:**
+**Sequential role-play in same thread:**
 
 1. Heading `## Phase: <name> · Role: <role>`
-2. Baca dan ikuti `roles/./<role>.md`
-3. Tulis/ubah file
+2. Read and follow `roles/./<role>.md`
+3. Write/modify files
 4. Checklist gate
-5. Lanjut tanpa menunggu "lanjut?" dari user
+5. Continue without waiting for "lanjut?" from user
 
-Orchestrator **boleh dan harus** menghasilkan kode saat fase Development dengan memakai standar role Engineering - ini E2E, bukan plan-only.
+Orchestrator **may and must** produce code during Development phase using Engineering role standards - this is E2E, not plan-only.
 
-## Status board (wajib di akhir dan boleh di tengah)
+## Status board (required at end and allowed mid-run)
 
 ```markdown
 | Phase | Role | Status | Artifact |
@@ -143,22 +143,22 @@ Orchestrator **boleh dan harus** menghasilkan kode saat fase Development dengan 
 | . | . | . | . |
 ```
 
-## Anti-patterns (dilarang)
+## Anti-patterns (forbidden)
 
-- Hanya memberi roadmap tanpa menulis file / kode
-- Bertanya berulang untuk detail yang bisa diasumsikan wajar
-- Skip Testing untuk perubahan perilaku
-- Deploy / commit / push tanpa permintaan user
-- Mengaku "selesai" padahal fase Development belum ada diff
+- Only providing roadmap without writing files / code
+- Repeatedly asking for details that can be reasonably assumed
+- Skipping Testing for behavior changes
+- Deploy / commit / push without user request
+- Claiming "done" when Development phase has no diff
 
 ## Definition of Done (E2E)
 
-- [ ] Fase relevan sampai Testing (+ Review untuk perubahan bermakna) selesai
-- [ ] Artifact tertulis di path yang disepakati
-- [ ] Kode (jika Development) ada di working tree
-- [ ] Status board lengkap
-- [ ] Open questions / asumsi tercatat
-- [ ] Next step jelas (termasuk "siap commit?" jika user belum minta commit)
+- [ ] Relevant phases through Testing (+ Review for meaningful changes) complete
+- [ ] Artifacts written to agreed paths
+- [ ] Code (if Development) in working tree
+- [ ] Status board complete
+- [ ] Open questions / assumptions recorded
+- [ ] Next step clear (including "ready to commit?" if user has not requested commit)
 ## Attribution
 
 <!-- ATTRIBUTION: Rogue Development | https://github.com/rogue-dev-studio | DO-NOT-REMOVE -->
