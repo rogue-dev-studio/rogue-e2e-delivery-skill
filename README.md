@@ -4,7 +4,7 @@
 
 End-to-end software house delivery. Use whenever the user asks to build a feature, fix a non-trivial bug, start a project, or run the full workflow. Orchestrates all roles and executes through Release unless blocked. Skip when WORKMODE is manual unless user/command forces E2E.
 
-- Market: https://rogue-dev-studio.github.io/rogue-market-agent/
+- Asset Store: https://rogue-dev-studio.github.io/rogue-asset-store/
 - Skill id: `e2e-delivery`
 
 ## Install
